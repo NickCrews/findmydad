@@ -6,23 +6,27 @@ This key can be used to retrieve the device's location for a single day.
 FRom https://github.com/hajekj/OfflineFindRecovery/blob/master/src/python/findmy-keygeneration.py
 """
 
+import io
 import json
 import logging
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from typing import IO
 
 from findmy import FindMyAccessory
 from findmy.keys import KeyType
 
-import fetch_reports
+import findmydad.fetch_reports as fetch_reports
 
 logger = logging.getLogger(__name__)
 
 
-def gen_keys(plist_path: str) -> None:
-    plist_path = Path(plist_path)
-    with open(plist_path, "rb") as f:
-        airtag = FindMyAccessory.from_plist(f)
+def gen_keys(plist: str | bytes | IO[bytes]) -> None:
+    if isinstance(plist, str):
+        with open(plist, "rb") as f:
+            plist = io.BytesIO(f.read())
+    elif isinstance(plist, bytes):
+        plist = io.BytesIO(plist)
+    airtag = FindMyAccessory.from_plist(plist)
 
     start = datetime.now(tz=timezone.utc) - timedelta(hours=48)
     end = datetime.now(tz=timezone.utc) + timedelta(hours=48)

@@ -1,0 +1,22 @@
+name: FindMyDad Scheduled Run
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-findmydad:
+    runs-on: ubuntu-latest
+    env:
+      FINDMYDAD_CONFIG: ${{ secrets.FINDMYDAD_CONFIG }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install a specific version of uv
+        uses: astral-sh/setup-uv@v6
+        with:
+            version: "0.7.7"
+      - name: Install project dependencies
+        run: uv sync
+      - name: Run findmydad
+        run: uv run python -m findmydad

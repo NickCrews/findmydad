@@ -11,4 +11,5 @@ wheels/
 
 # This repo stuff
 account.json
-plists
+**/*.plist
+config.json
