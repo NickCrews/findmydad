@@ -18,12 +18,13 @@ class Config(TypedDict):
 def save_config():
     dotenv.load_dotenv()
     plist_path = Path(os.getenv("PLIST_PATH", "plist.plist"))
+    account_json_path = Path(os.getenv("ACCOUNT_JSON_PATH", "account.json"))
     config = Config(
         TEXTBELT_API_KEY=os.environ["TEXTBELT_API_KEY"],
         GEOFENCES_URL=os.environ["GEOFENCES_URL"],
         ANISETTE_URL=os.environ["ANISETTE_URL"],
         PHONE_NUMBERS=json.loads(os.environ["PHONE_NUMBERS"]),
-        ACCOUNT_JSON=Path("account.json").read_text(),
+        ACCOUNT_JSON=account_json_path.read_text(),
         PLIST_BYTES=plist_path.read_bytes().decode("utf-8"),
     )
     with open("config.json", "w") as f:
