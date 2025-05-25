@@ -17,3 +17,7 @@ dev-dependencies = [
     "ruff",
     "dotenv",
 ]
+
+[build-system]
+requires = ["pdm-backend>=1.0.0"]
+build-backend = "pdm.backend"

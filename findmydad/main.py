@@ -45,8 +45,15 @@ def _google_maps_info(lat: float, lon: float) -> str:
 def summarize_violations(violations: list[Violation]) -> str:
     # there could be multiple violations that tie as the latest,
     # but here it doesn't matter which one we pick
-    violation = max(violations, key=lambda x: x["timestamp"])
-    return f"At {violation['timestamp']}, Dad was at {_google_maps_info(violation['lat'], violation['lon'])} "
+    latest_violation = max(violations, key=lambda x: x["timestamp"])
+    geofence_timezone = latest_violation["geofence"]["timezone"]
+    # print the timestamp without the timezone info
+    violation_timestamp_in_localtime = (
+        latest_violation["timestamp"]
+        .astimezone(geofence_timezone)
+        .strftime("%Y-%m-%d %H:%M:%S")
+    )
+    return f"At {violation_timestamp_in_localtime} ({geofence_timezone}), Dad was at {_google_maps_info(latest_violation['lat'], latest_violation['lon'])} "
 
 
 def main():
