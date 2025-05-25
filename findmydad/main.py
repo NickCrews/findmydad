@@ -18,25 +18,21 @@ class Violation(typing.TypedDict):
     geofence: Geofence
 
 
-def all_violations(reports: list[Report], fences: GeofenceManager) -> list[Violation]:
-    violations = []
-    for report in reports:
-        violated_fences = fences.violations(
-            lat=report["lat"],
-            lon=report["lon"],
-            timestamp=report["timestamp"],
-        )
-        for fence in violated_fences:
-            violations.append(
-                {
-                    "lat": report["lat"],
-                    "lon": report["lon"],
-                    "timestamp": report["timestamp"],
-                    "geofence": fence,
-                }
-            )
-
-    return violations
+def get_violations(report: Report, fences: GeofenceManager) -> list[Violation]:
+    violated_fences = fences.violations(
+        lat=report["lat"],
+        lon=report["lon"],
+        timestamp=report["timestamp"],
+    )
+    return [
+        {
+            "lat": report["lat"],
+            "lon": report["lon"],
+            "timestamp": report["timestamp"],
+            "geofence": fence,
+        }
+        for fence in violated_fences
+    ]
 
 
 def _google_maps_info(lat: float, lon: float) -> str:
@@ -46,6 +42,8 @@ def _google_maps_info(lat: float, lon: float) -> str:
 
 
 def summarize_violations(violations: list[Violation]) -> str:
+    # there could be multiple violations that tie as the latest,
+    # but here it doesn't matter which one we pick
     violation = max(violations, key=lambda x: x["timestamp"])
     return f"At {violation['timestamp']}, Dad was at {_google_maps_info(violation['lat'], violation['lon'])} "
 
@@ -63,7 +61,8 @@ def main():
         anisette_url=config["ANISETTE_URL"],
         account_json=config["ACCOUNT_JSON"],
     )
-    violations = all_violations(reports, fence_manager)
+    latest_report = max(reports, key=lambda x: x["timestamp"], default=None)
+    violations = get_violations(latest_report, fence_manager)
     logger.info(f"Found {len(violations)} violations")
     if violations:
         message = summarize_violations(violations)
