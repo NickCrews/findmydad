@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from Crypto.Cipher import AES
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 # Author: Shane B. <shane@wander.dev>
 #
@@ -75,8 +75,9 @@ def decrypt_plist(in_file_path: str, key: bytearray) -> dict:
         raise Exception("Invalid plist format")
 
     nonce, tag, ciphertext = plist[0], plist[1], plist[2]
-    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
-    decrypted_plist = cipher.decrypt_and_verify(ciphertext, tag)
+    cipher = Cipher(algorithms.AES(key), modes.GCM(nonce, tag))
+    decryptor = cipher.decryptor()
+    decrypted_plist = decryptor.update(ciphertext) + decryptor.finalize()
 
     try:
         decrypted_plist = plistlib.loads(decrypted_plist)
