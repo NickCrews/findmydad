@@ -6,6 +6,7 @@ import typing
 from findmydad.config import load_config
 from findmydad.fetch_reports import Report, fetch_reports
 from findmydad.geofences import Geofence, GeofenceManager
+from findmydad.logger import setup_logging
 from findmydad.notify import send_sms
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def summarize_violations(violations: list[Violation]) -> str:
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
+    setup_logging()
     config = load_config(os.getenv("FINDMYDAD_CONFIG"))
     for key, value in config.items():
         logger.debug(
