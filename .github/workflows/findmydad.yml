@@ -1,8 +1,9 @@
 name: FindMyDad Scheduled Run
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'
+  # Turn off for now, the anisette server is down
+  # schedule:
+    # - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
