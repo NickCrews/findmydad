@@ -2,8 +2,14 @@
 
 Experimenting with geofencing for apple airtags.
 My father in law has dementia and is prone to wandering off (especially at night, oh joy!).
-This sends me a text when the airtag in his shoe leaves the area around our house,
-which REALLY helps us sleep better at night.
+The idea is that this sends me a text when the airtag in his shoe leaves the area around our house.
+
+FOLLOWUP:
+It turns out this doesn't work consistently enough that I would actually recommend it
+as a reliable alerting mechanism for others.
+The FindMy network just doesn't seem to update frequently enough where I live,
+even though it is a fairly dense neighborhood near downtown Boulder, CO.
+But still, hopefuly someone can steal a few ideas from this.
 
 A github action runs a script every 15 minutes. The script:
 - Fetches the location of his airtag using https://github.com/malmeloo/FindMy.py
