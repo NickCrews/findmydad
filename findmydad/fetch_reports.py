@@ -1,52 +1,32 @@
 import asyncio
 import datetime
-import io
 import json
 import logging
+import sys
 import typing
+from pathlib import Path
 
-from findmy import KeyPair
+from findmy import FindMyAccessory
 from findmy.keys import KeyType
+from findmy.reports.reports import LocationReport
 
-import findmydad.gen_keys as gen_keys
 from findmydad.account import get_account
 
 logger = logging.getLogger(__name__)
 
 
-class Report(typing.TypedDict):
-    timestamp: datetime.datetime
-    lat: float
-    lon: float
-    published_at: datetime.datetime
-    description: str
-    confidence: int
-    status: str
-    key: KeyPair
-
-
-def _to_key_pairs(
-    plist_or_keys: str | bytes | typing.IO[bytes] | list[KeyPair],
-) -> list[KeyPair]:
-    if isinstance(plist_or_keys, (str, bytes, io.BytesIO)):
-        # plist_or_keys is a plist file or bytes
-        keys = gen_keys.gen_keys(plist_or_keys)
-        key_pairs = [KeyPair.from_b64(key_info["private_key_b64"]) for key_info in keys]
-    return key_pairs
-
-
 def fetch_reports(
-    plist_or_keys: str | bytes | typing.IO[bytes] | list[KeyPair],
+    device: FindMyAccessory | str | Path,
     *,
     anisette_url: str | None = None,
     account_json: str | bytes | typing.IO[bytes] | None = None,
-) -> list[Report]:
-    keys = _to_key_pairs(plist_or_keys)
+) -> list[LocationReport]:
+    device = get_device(device)
 
     def do():
         return asyncio.run(
             _fetch_reports(
-                keys=keys, anisette_url=anisette_url, account_json=account_json
+                device=device, anisette_url=anisette_url, account_json=account_json
             )
         )
 
@@ -62,29 +42,19 @@ def fetch_reports(
 
 async def _fetch_reports(
     *,
-    keys: list[KeyPair],
+    device: FindMyAccessory,
     anisette_url: str | None = None,
     account_json: str | bytes | typing.IO[bytes] | None = None,
-) -> list[Report]:
+) -> list[LocationReport]:
     acc = await get_account(anisette_url=anisette_url, account_json=account_json)
-    dump_list = []
+    date_from = datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(
+        hours=48
+    )
+    date_to = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(
+        hours=48
+    )
     try:
-        reports = await acc.fetch_last_reports(keys)
-        for keypair in reports:
-            report_raw = reports[keypair]
-            for r in report_raw:
-                rep = Report(
-                    timestamp=r.timestamp,
-                    lat=r.latitude,
-                    lon=r.longitude,
-                    published_at=r.published_at,
-                    description=r.description,
-                    confidence=r.confidence,
-                    status=r.status,
-                    key=r.key.private_key_b64,
-                )
-                dump_list.append(rep)
-        return dump_list
+        return await acc.fetch_reports(device, date_from, date_to)
     finally:
         await acc.close()
 
@@ -97,10 +67,27 @@ def default_serialize(obj):
     raise TypeError("Type not serializable")
 
 
+def get_device(x: FindMyAccessory | str | Path) -> FindMyAccessory:
+    if isinstance(x, FindMyAccessory):
+        return x
+    elif isinstance(x, Path):
+        if x.suffix == ".plist":
+            return FindMyAccessory.from_plist(x)
+        elif x.suffix == ".json":
+            return FindMyAccessory.from_json(x)
+    elif isinstance(x, str):
+        if x.endswith(".plist"):
+            return FindMyAccessory.from_plist(Path(x))
+        elif x.endswith(".json"):
+            return FindMyAccessory.from_json(Path(x))
+        else:
+            raise ValueError("String must be a path to a .plist or .json file")
+    else:
+        raise ValueError("x must be a FindMyAccessory or str")
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    plist_path = "./plist.plist"
-    # print(key_pairs[:5])
-    reports = _to_key_pairs(plist_path)
+    reports = fetch_reports(sys.argv[1])
     logger.info(f"Fetched {len(reports)} reports")
     print(json.dumps(reports, indent=4, default=default_serialize))

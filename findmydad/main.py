@@ -3,8 +3,11 @@ import logging
 import os
 import typing
 
+from findmy import FindMyAccessory
+from findmy.reports.reports import LocationReport
+
 from findmydad.config import load_config
-from findmydad.fetch_reports import Report, fetch_reports
+from findmydad.fetch_reports import fetch_reports
 from findmydad.geofences import Geofence, GeofenceManager
 from findmydad.logger import setup_logging
 from findmydad.notify import send_sms
@@ -19,17 +22,17 @@ class Violation(typing.TypedDict):
     geofence: Geofence
 
 
-def get_violations(report: Report, fences: GeofenceManager) -> list[Violation]:
+def get_violations(report: LocationReport, fences: GeofenceManager) -> list[Violation]:
     violated_fences = fences.violations(
-        lat=report["lat"],
-        lon=report["lon"],
-        timestamp=report["timestamp"],
+        lat=report.latitude,
+        lon=report.longitude,
+        timestamp=report.timestamp,
     )
     return [
         {
-            "lat": report["lat"],
-            "lon": report["lon"],
-            "timestamp": report["timestamp"],
+            "lat": report.latitude,
+            "lon": report.longitude,
+            "timestamp": report.timestamp,
             "geofence": fence,
         }
         for fence in violated_fences
@@ -64,12 +67,13 @@ def main():
             f"{key}: {value[:10] if isinstance(value, (str, bytes)) else value}..."
         )
     fence_manager = GeofenceManager(config["GEOFENCES_URL"])
+    device = FindMyAccessory.from_json(config["ACCESSORY_JSON"])
     reports = fetch_reports(
-        config["PLIST_BYTES"],
+        device,
         anisette_url=config["ANISETTE_URL"],
         account_json=config["ACCOUNT_JSON"],
     )
-    latest_report = max(reports, key=lambda x: x["timestamp"], default=None)
+    latest_report = max(reports, key=lambda x: x.timestamp, default=None)
     violations = get_violations(latest_report, fence_manager)
     logger.info(f"Found {len(violations)} violations")
     if violations:

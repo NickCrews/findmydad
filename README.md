@@ -20,10 +20,12 @@ This requires python development knowledge and isn't for the feint of heart.
 You need a macOS machine with the airtag paired on it.
 
 - Copy `.env.sample` to `.env`.
-- run `uv run findmydad/decrypt_plist.py` to go through the encypted files that
-  apple's FindMy app stores on your mac. It will decrypt them into .plist files
-  in the `plist/` directory. There will be one for every Find My accessory you have paired.
-  Find the one for the airtag you want to track, and fill this in `PLIST_PATH` in `.env`.
+- run `uv run python -m findmy decrypt` to go through the encypted files that
+  apple's FindMy app stores on your mac,
+  decrypt them, and print the JSON to stdout.
+  There will be one for every Find My accessory you have paired.
+  Find the one for the airtag you want to track, store this in eg `dad.json`
+  and write down this path in `ACCESSORY_JSON_PATH` in `.env`.
 - Set up a permanent anisette server that will serve as the middleman to authenticate with
   apple's servers. Follow the instructions in [this issue thread](https://github.com/malmeloo/FindMy.py/issues/48#issuecomment-2901848737) to do this with a container for free on google cloud run.
   Hopefully this step won't be needed in the future

@@ -11,13 +11,13 @@ class Config(TypedDict):
     GEOFENCES_URL: str
     ANISETTE_URL: str
     ACCOUNT_JSON: str
-    PLIST_BYTES: bytes
+    ACCESSORY_JSON: str
     PHONE_NUMBERS: list[str]
 
 
 def save_config():
     dotenv.load_dotenv()
-    plist_path = Path(os.getenv("PLIST_PATH", "plist.plist"))
+    accessory_path = Path(os.getenv("ACCESSORY_JSON_PATH", "accessory.json"))
     account_json_path = Path(os.getenv("ACCOUNT_JSON_PATH", "account.json"))
     config = Config(
         TEXTBELT_API_KEY=os.environ["TEXTBELT_API_KEY"],
@@ -25,7 +25,7 @@ def save_config():
         ANISETTE_URL=os.environ["ANISETTE_URL"],
         PHONE_NUMBERS=json.loads(os.environ["PHONE_NUMBERS"]),
         ACCOUNT_JSON=account_json_path.read_text(),
-        PLIST_BYTES=plist_path.read_bytes().decode("utf-8"),
+        ACCESSORY_JSON=accessory_path.read_text(),
     )
     with open("config.json", "w") as f:
         json.dump(config, f, indent=4)
@@ -47,7 +47,7 @@ def load_config(path_or_contents: Path | str | None = None) -> Config:
         GEOFENCES_URL=config["GEOFENCES_URL"],
         ANISETTE_URL=config["ANISETTE_URL"],
         ACCOUNT_JSON=config["ACCOUNT_JSON"],
-        PLIST_BYTES=config["PLIST_BYTES"].encode("utf-8"),
+        ACCESSORY_JSON=config["ACCESSORY_JSON"],
     )
 
 

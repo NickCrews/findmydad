@@ -1,5 +1,4 @@
 import asyncio
-import io
 import json
 import logging
 import os
@@ -16,7 +15,7 @@ from findmy.reports import (
 logger = logging.getLogger(__name__)
 
 
-async def login(account: AsyncAppleAccount) -> dict:
+async def login(account: AsyncAppleAccount) -> None:
     account_id = os.environ.get("APPLE_ID") or input("Apple ID (email or phone)? > ")
     apple_pass = os.environ.get("APPLE_PASSWORD") or input("Password? > ")
     state = await account.login(account_id, apple_pass)
@@ -35,9 +34,6 @@ async def login(account: AsyncAppleAccount) -> dict:
         await method.request()
         code = input("Code? > ")
         await method.submit(code)
-    string_io = io.StringIO()
-    account.export(string_io)
-    return json.loads(string_io.getvalue())
 
 
 async def get_account(
@@ -45,7 +41,7 @@ async def get_account(
 ) -> AsyncAppleAccount:
     annisette_url = anisette_url or os.environ.get("ANISETTE_URL")
     anisette = RemoteAnisetteProvider(annisette_url)
-    acc = AsyncAppleAccount(anisette)
+    acc = AsyncAppleAccount(anisette=anisette)
     if account_json is None:
         account_json = Path("account.json")
 
@@ -62,17 +58,12 @@ async def get_account(
         raise ValueError("account_json must be a Path, str, or dict")
 
     if account_dict is None:
-        account_dict = await login(acc)
+        await login(acc)
+        if isinstance(account_json, (str, Path)):
+            acc.to_json(account_json)
     else:
-        acc.restore(account_dict)
+        acc.from_json(account_dict)
 
-    # try:
-    #     with acc_store.open() as f:
-    #         acc.restore(json.load(f))
-    # except FileNotFoundError:
-    #     await login(acc)
-    #     with acc_store.open("w+") as f:
-    #         json.dump(acc.export(), f)
     logger.info(f"Logged in as: {acc.account_name} ({acc.first_name} {acc.last_name})")
     return acc
 

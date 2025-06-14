@@ -302,7 +302,7 @@ wheels = [
 
 [[package]]
 name = "findmy"
-version = "0.7.6"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -312,9 +312,9 @@ dependencies = [
     { name = "srp" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9e/e3/16096ef68958385d9494d02ea88f53e3846df5222cdb63fe4cf44580995b/findmy-0.7.6.tar.gz", hash = "sha256:f6c3398d06359f77bfbd6b1cc6c9ac380bb7bef6f139f1b0d1f9b51da7b5cbaf", size = 28083, upload-time = "2025-01-05T12:11:11.158Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/03/5aa7a9c9693b384fd9142443c570fd63572e9bc9a954f8a2794338ed06e1/findmy-0.8.0.tar.gz", hash = "sha256:4aaedc4db4cddb173b46a9b5357ac68e9a10ee20d79ba32d9da2320c9302b59f", size = 154230, upload-time = "2025-06-14T14:41:55.733Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f6/94/8cef0d88753f28955eeb8712a3bcc5808d2833c3a47334e39e100f737551/findmy-0.7.6-py3-none-any.whl", hash = "sha256:217bcf5af228ea0569fb9faafb84a0a55f0499d3d3af9e685a1cf3eadac1d0d1", size = 33018, upload-time = "2025-01-05T12:11:07.247Z" },
+    { url = "https://files.pythonhosted.org/packages/f2/c4/bac599445c24f9da2f32bf7b60f521d252ffa223250cadf4b5a16d7f66e0/findmy-0.8.0-py3-none-any.whl", hash = "sha256:313aaa3e8d3404187decfe6486ef70ddc2a47bbddf320eac1c3ea83fbc6a4929", size = 37385, upload-time = "2025-06-14T14:41:54.57Z" },
 ]
 
 [[package]]
